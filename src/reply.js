@@ -2,8 +2,9 @@ import "dotenv/config";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { generateResponse } from "./claude.js";
 import { SYSTEM_PROMPT, REPLY_PROMPT } from "./prompt.js";
-import { getMentions, replyToTweet } from "./twitter.js";
+import { getMentions, replyToTweet, getBotUserId } from "./twitter.js";
 import { parseAction, stripAction, executeAction } from "./actions.js";
+import { isSafeToReply } from "./safety.js";
 
 const STATE_FILE = ".last_mention_id";
 
@@ -21,6 +22,7 @@ function saveLastMentionId(id) {
 async function processReplies() {
   const sinceId = getLastMentionId();
   const mentions = await getMentions(sinceId);
+  const botId = await getBotUserId();
 
   if (mentions.length === 0) {
     console.log("[REPLY] No new mentions");
@@ -31,6 +33,12 @@ async function processReplies() {
 
   for (const mention of mentions.reverse()) {
     try {
+      if (!isSafeToReply(mention, botId)) {
+        console.log(`[SKIP] Mention ${mention.id} failed safety check`);
+        saveLastMentionId(mention.id);
+        continue;
+      }
+
       const prompt = `${REPLY_PROMPT}\n\n"${mention.text}"`;
       const response = await generateResponse(SYSTEM_PROMPT, prompt);
 
