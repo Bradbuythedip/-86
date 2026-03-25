@@ -1,6 +1,8 @@
 import { TwitterApi } from "twitter-api-v2";
+import { sanitizeTweet } from "./safety.js";
 
 let client = null;
+let botUserId = null;
 
 export function getClient() {
   if (!client) {
@@ -14,10 +16,20 @@ export function getClient() {
   return client;
 }
 
+export async function getBotUserId() {
+  if (!botUserId) {
+    const tw = getClient();
+    const me = await tw.v2.me();
+    botUserId = me.data.id;
+  }
+  return botUserId;
+}
+
 export async function postTweet(text) {
   const tw = getClient();
-  const result = await tw.v2.tweet(text);
-  console.log(`[POSTED] ${text.slice(0, 60)}...`);
+  const safe = sanitizeTweet(text);
+  const result = await tw.v2.tweet(safe);
+  console.log(`[POSTED] ${safe.slice(0, 60)}...`);
   return result;
 }
 
@@ -26,12 +38,13 @@ export async function postThread(tweets) {
   let lastTweetId = null;
 
   for (const text of tweets) {
+    const safe = sanitizeTweet(text);
     const options = lastTweetId
       ? { reply: { in_reply_to_tweet_id: lastTweetId } }
       : {};
-    const result = await tw.v2.tweet(text, options);
+    const result = await tw.v2.tweet(safe, options);
     lastTweetId = result.data.id;
-    console.log(`[THREAD] ${text.slice(0, 60)}...`);
+    console.log(`[THREAD] ${safe.slice(0, 60)}...`);
   }
 
   return lastTweetId;
@@ -39,16 +52,16 @@ export async function postThread(tweets) {
 
 export async function replyToTweet(tweetId, text) {
   const tw = getClient();
-  const result = await tw.v2.reply(text, tweetId);
-  console.log(`[REPLY] -> ${tweetId}: ${text.slice(0, 60)}...`);
+  const safe = sanitizeTweet(text);
+  const result = await tw.v2.reply(safe, tweetId);
+  console.log(`[REPLY] -> ${tweetId}: ${safe.slice(0, 60)}...`);
   return result;
 }
 
 export async function getMentions(sinceId) {
-  const tw = getClient();
-  const me = await tw.v2.me();
-  const userId = me.data.id;
+  const userId = await getBotUserId();
 
+  const tw = getClient();
   const params = {
     "tweet.fields": ["author_id", "conversation_id", "created_at", "text"],
     max_results: 20,

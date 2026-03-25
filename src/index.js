@@ -2,8 +2,9 @@ import "dotenv/config";
 import { CronJob } from "cron";
 import { generateResponse } from "./claude.js";
 import { SYSTEM_PROMPT, POST_PROMPT, STORY_PROMPT, REPLY_PROMPT } from "./prompt.js";
-import { postTweet, postThread, getMentions, replyToTweet } from "./twitter.js";
+import { postTweet, postThread, getMentions, replyToTweet, getBotUserId } from "./twitter.js";
 import { parseAction, stripAction, executeAction } from "./actions.js";
+import { isSafeToReply } from "./safety.js";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 
 const STATE_FILE = ".last_mention_id";
@@ -44,6 +45,7 @@ async function autoReply() {
   try {
     const sinceId = getLastMentionId();
     const mentions = await getMentions(sinceId);
+    const botId = await getBotUserId();
 
     if (mentions.length === 0) return;
 
@@ -51,6 +53,12 @@ async function autoReply() {
 
     for (const mention of mentions.reverse()) {
       try {
+        if (!isSafeToReply(mention, botId)) {
+          console.log(`[SKIP] Mention ${mention.id} failed safety check`);
+          saveLastMentionId(mention.id);
+          continue;
+        }
+
         const prompt = `${REPLY_PROMPT}\n\n"${mention.text}"`;
         const response = await generateResponse(SYSTEM_PROMPT, prompt);
         const action = parseAction(response);
