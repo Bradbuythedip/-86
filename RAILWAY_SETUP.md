@@ -14,9 +14,10 @@
    - Bearer Token
 5. **IMPORTANT**: Make sure the Access Token has **Read and Write** permissions, not just Read
 
-### Anthropic API Key
-1. Go to https://console.anthropic.com
+### xAI / Grok API Key
+1. Go to https://console.x.ai
 2. Create an API key
+3. Grok 4 will be used as the LLM brain
 
 ### Solana Wallet (optional, for token actions)
 1. Generate or export a Solana wallet private key (base58 encoded)
@@ -62,7 +63,7 @@ TWITTER_API_SECRET=your_api_secret_here
 TWITTER_ACCESS_TOKEN=your_access_token_here
 TWITTER_ACCESS_SECRET=your_access_secret_here
 TWITTER_BEARER_TOKEN=your_bearer_token_here
-ANTHROPIC_API_KEY=sk-ant-your_key_here
+XAI_API_KEY=xai-your_key_here
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 SOLANA_PRIVATE_KEY=your_base58_private_key
 POST_INTERVAL_MINUTES=60
@@ -138,7 +139,7 @@ Adjust these environment variables in Railway:
 | Railway | Hobby | $5/mo + usage (usually ~$2-5/mo for a bot) |
 | Twitter API | Free | $0 (50 tweets/day, post only) |
 | Twitter API | Basic | $100/mo (read + write, mentions timeline) |
-| Anthropic API | Pay-as-you-go | ~$5-15/mo depending on volume |
+| xAI Grok API | Pay-as-you-go | ~$5-15/mo depending on volume |
 | Solana RPC | Free tier | $0 (public RPC) |
 
 **Total: ~$10-120/mo** depending on Twitter API tier.
