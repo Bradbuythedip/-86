@@ -1,0 +1,20 @@
+{
+  "name": "86-twitter-bot",
+  "version": "1.0.0",
+  "description": "10086 - self-deprecating leek degen Twitter bot on Solana",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "post": "node src/post.js",
+    "reply": "node src/reply.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "twitter-api-v2": "^1.18.2",
+    "@solana/web3.js": "^1.95.0",
+    "dotenv": "^16.4.7",
+    "cron": "^3.1.7"
+  }
+}
